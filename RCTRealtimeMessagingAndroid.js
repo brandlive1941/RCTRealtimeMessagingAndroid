@@ -2,6 +2,8 @@
 //  Copyright (c) 2015 Realtime. All rights reserved.
 //
 
+//  Forked and altered by Adam Denny on 06/15/17
+
 /**
  * @providesModule RCTRealtimeMessagingAndroid
  * @flow
@@ -10,15 +12,14 @@
 'use strict';
 
 import React, { Component } from 'react';
-import { NativeModules } from 'react-native';
-var RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
+import { NativeModules, DeviceEventEmitter } from 'react-native';
 var ortcClient = NativeModules.RealtimeMessagingAndroid;
 var RTEvents = {};
 var instances = 0;
 
-class RCTRealtimeMessagingAndroid extends React.Component {
+export default class RCTRealtimeMessagingAndroid extends Component {
 	id: String;
-	
+
 	RCTRealtimeMessagingAndroid(){
 		this.id = instances++;
 	}
@@ -30,7 +31,7 @@ class RCTRealtimeMessagingAndroid extends React.Component {
 	RTConnect(config){
 		ortcClient.connect(config, this.id);
 	}
-	
+
 	RTDisconnect(){
 		ortcClient.disconnect(this.id);
 	}
@@ -59,12 +60,12 @@ class RCTRealtimeMessagingAndroid extends React.Component {
 		ortcClient.unsubscribe(channel, this.id);
 	}
 
-	RTPublishMessage(channel, message, ttl, callBack){
-		ortcClient.publish(channel, message, ttl, this.id, callBack);
+	RTSendMessage(channel, message){
+		ortcClient.sendMessage(message, channel, this.id);
 	}
 
-	RTSendMessage(message, channel){
-		ortcClient.sendMessage(message, channel, this.id);
+	RTPublishMessage(message, channel, ttl){
+		ortcClient.publish(channel, message, ttl, this.id);
 	}
 
 	RTEnablePresence(aPrivateKey, channel, aMetadata:boolean){
@@ -131,7 +132,7 @@ class RCTRealtimeMessagingAndroid extends React.Component {
 	*/
 
 	RTPushNotificationListener(callBack: Function){
-		require('RCTDeviceEventEmitter').addListener(
+		DeviceEventEmitter.addListener(
 			  'onPushNotification',
 			  callBack
 			);
@@ -140,6 +141,7 @@ class RCTRealtimeMessagingAndroid extends React.Component {
 
 
 	RTEventListener(notification, callBack: Function){
+		console.log(notification);
 		var modNotification = String(this.id) + '-' + notification;
 		var channelExists = RTEvents[modNotification];
 		if (channelExists){
@@ -147,7 +149,7 @@ class RCTRealtimeMessagingAndroid extends React.Component {
 		}
 
 		RTEvents[modNotification] = (
-			require('RCTDeviceEventEmitter').addListener(
+			DeviceEventEmitter.addListener(
 			  modNotification,
 			  callBack
 			)
@@ -163,3 +165,4 @@ class RCTRealtimeMessagingAndroid extends React.Component {
 }
 
 module.exports = RCTRealtimeMessagingAndroid;
+
