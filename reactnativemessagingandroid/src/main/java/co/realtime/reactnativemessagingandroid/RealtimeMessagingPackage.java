@@ -19,7 +19,7 @@ public class RealtimeMessagingPackage implements ReactPackage {
         return Arrays.asList(new NativeModule[]{new RealtimeMessagingAndroid(reactContext)});
     }
 
-    @Override
+    //@Override react 0.47 compat
     public List<Class<? extends JavaScriptModule>> createJSModules() {
         return Collections.emptyList();
     }
